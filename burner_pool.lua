@@ -15,14 +15,14 @@ end
 
 local BurnerPool = {}
 
-function BurnerPool:new() 
+function module.BurnerPool:new() 
     local temp = setmetatable({}, { __index = BurnerPool })
     temp.accounts = {}
 
     return temp
 end
 
-function BurnerPool:generate_adress()
+function module.BurnerPool:generate_adress()
     local pool_sz = #self.accounts
     local adress
 
@@ -42,7 +42,7 @@ function BurnerPool:generate_adress()
     return adress
 end
 
-function BurnerPool:get_logs()
+function module.BurnerPool:get_logs()
     local log_sum = {}
     for k, v in ipairs(self.accounts) do
         -- print ("we are on account " .. tostring(k))
@@ -59,7 +59,7 @@ function BurnerPool:get_logs()
     return log_sum
 end
 
-function BurnerPool:del()
+function module.BurnerPool:del()
     for k, v in ipairs(self.accounts) do
         ccash.delete_self(v.name, v.pass)
     end
