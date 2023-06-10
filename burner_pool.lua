@@ -26,9 +26,17 @@ function module.BurnerPool:generate_adress()
     local pool_sz = #self.accounts
     local adress
 
-    if (pool_sz == 0 or self.accounts[pool_sz].capacity == 0) then
-        local name, pass, success, reason = make_burner()
-        if (success == false) then return nil end
+    if (pool_sz == 0) or (self.accounts[pool_sz].capacity == 0) then
+        while 1 == 1 do
+            local name, pass, success, reason = make_burner()
+            if (success == false) then                     
+                if ccash.user_exists(name) == false then
+                    return nil
+                end
+            else
+                break
+            end
+        end
 
         table.insert(self.accounts, {name = name, pass = pass, capacity = get_max_log() - 1})
     else
@@ -59,6 +67,7 @@ function module.BurnerPool:get_logs()
     return log_sum
 end
 
+-- TODO: make __gc for BurnerPool objects
 function module.BurnerPool:del()
     for k, v in ipairs(self.accounts) do
         ccash.delete_self(v.name, v.pass)
