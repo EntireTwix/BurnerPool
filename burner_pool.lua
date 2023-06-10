@@ -27,8 +27,9 @@ function module.BurnerPool:generate_adress()
     local adress
 
     if (pool_sz == 0) or (self.accounts[pool_sz].capacity == 0) then
+        local name, pass, success
         while 1 == 1 do
-            local name, pass, success, reason = make_burner()
+            name, pass, success, _ = make_burner()
             if (success == false) then                     
                 if ccash.user_exists(name) == false then
                     return nil
