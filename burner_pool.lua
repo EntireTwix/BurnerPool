@@ -13,7 +13,7 @@ function get_max_log()
     return ccash.properties().max_log
 end
 
-local BurnerPool = {}
+module.BurnerPool = {}
 
 function module.BurnerPool:new() 
     local temp = setmetatable({}, { __index = BurnerPool })
@@ -67,12 +67,15 @@ function module.BurnerPool:get_logs()
     return log_sum
 end
 
--- TODO: make __gc for BurnerPool objects
 function module.BurnerPool:del()
     for k, v in ipairs(self.accounts) do
         ccash.delete_self(v.name, v.pass)
     end
     self.accounts = {}
+end
+
+function module.BurnerPool:__gc()
+    self:del()
 end
 
 return module
