@@ -22,7 +22,7 @@ function module.BurnerPool:new()
     return temp
 end
 
-function module.BurnerPool:generate_adress()
+function module.BurnerPool:gen_adress()
     local pool_sz = #self.accounts
     local adress
 
