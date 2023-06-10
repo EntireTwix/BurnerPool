@@ -56,7 +56,7 @@ function module.BurnerPool:get_logs()
         -- print ("we are on account " .. tostring(k))
         local log, _, _ = ccash.get_log_v2(v.name, v.pass)
         if log == nil then return nil end
-        v.capacity = #log -- updating capacity for sorting
+        v.capacity = get_max_log - #log -- updating capacity for sorting
         local log_sum_sz = #log_sum
         for k2, v2 in ipairs(log) do 
             -- print("log index " .. log_sum_sz + k2)
