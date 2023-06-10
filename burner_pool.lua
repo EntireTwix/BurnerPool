@@ -16,7 +16,7 @@ end
 module.BurnerPool = {}
 
 function module.BurnerPool:new() 
-    local temp = setmetatable({}, { __index = BurnerPool })
+    local temp = setmetatable({}, { __index = module.BurnerPool })
     temp.accounts = {}
 
     return temp
