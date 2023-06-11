@@ -3,10 +3,18 @@ local ccash = require("ccash.api")
 local module = {}
 
 function module.make_burner()
-    local name = tostring(math.random(10^2, 10^16 - 1))
-    local pass = tostring(math.random(10^8, 10^9 - 1))
-    local success, _, reason = ccash.register(name, pass)
-    return name, pass, success, reason
+    while 1 == 1 do
+        local name = tostring(math.random(10^2, 10^16 - 1))
+        local pass = tostring(math.random(10^8, 10^9 - 1))
+        local success, response_code, _ = ccash.register(name, pass)
+        if (success == false) then                     
+            if response_code ~= 409 then
+                return nil, nil
+            end
+        else
+            return name, pass
+        end
+    end
 end
 
 module.BurnerPool = {}
@@ -23,18 +31,7 @@ function module.BurnerPool:gen_adress()
     local adress
 
     if (pool_sz == 0) or (self.accounts[pool_sz].capacity == 0) then
-        local name, pass, success
-        while 1 == 1 do
-            name, pass, success, _ = make_burner()
-            if (success == false) then                     
-                if ccash.user_exists(name) == false then
-                    return nil
-                end
-            else
-                break
-            end
-        end
-
+        local name, pass = module.make_burner()
         table.insert(self.accounts, {name = name, pass = pass, capacity = ccash.properties().max_log - 1})
     else
         self.accounts[#self.accounts].capacity = self.accounts[#self.accounts].capacity - 1
