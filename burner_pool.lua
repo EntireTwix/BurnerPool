@@ -23,19 +23,19 @@ local max_log_sz = ccash.properties().max_log -- generated each boot
 module.BurnerPool = {}
 module.Shell = {}
 
-function module.Shell:new(owner)
-    local temp = setmetatable(module.make_burner(), { __index = module.BurnerPool })
-    temp.owner = owner
+function module.Shell:new(dest)
+    local temp = setmetatable(module.make_burner(), { __index = module.Shell })
+    temp.dest = dest
 
     return temp
 end
 
-function module.Shell:deposit(dest)
-    ccash.send_funds(self.name, self.pass, dest, ccash.get_bal(self.name))
+function module.Shell:deposit()
+    ccash.send_funds(self.name, self.pass, self.dest, ccash.get_bal(self.name))
 end
 
-function module.Shell:withdraw()
-    ccash.send_funds(self.name, self.pass, self.owner, ccash.get_bal(self.name))
+function module.Shell:withdraw(owner)
+    ccash.send_funds(self.name, self.pass, owner, ccash.get_bal(self.name))
 end
 
 function module.Shell:del()
