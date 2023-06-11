@@ -2,15 +2,11 @@ local ccash = require("ccash.api")
 
 local module = {}
 
-function make_burner()
+function module.make_burner()
     local name = tostring(math.random(10^2, 10^16 - 1))
     local pass = tostring(math.random(10^8, 10^9 - 1))
     local success, _, reason = ccash.register(name, pass)
     return name, pass, success, reason
-end
-
-function get_max_log() 
-    return ccash.properties().max_log
 end
 
 module.BurnerPool = {}
@@ -39,7 +35,7 @@ function module.BurnerPool:gen_adress()
             end
         end
 
-        table.insert(self.accounts, {name = name, pass = pass, capacity = get_max_log() - 1})
+        table.insert(self.accounts, {name = name, pass = pass, capacity = ccash.properties().max_log - 1})
     else
         self.accounts[#self.accounts].capacity = self.accounts[#self.accounts].capacity - 1
         -- print ("capacity decremented to " .. self.accounts[#self.accounts].capacity)
@@ -57,7 +53,7 @@ function module.BurnerPool:get_logs()
         -- print ("we are on account " .. tostring(k))
         local log, _, _ = ccash.get_log_v2(v.name, v.pass)
         if log == nil then return nil end
-        v.capacity = get_max_log - #log -- updating capacity for sorting
+        v.capacity = ccash.properties().max_log - #log -- updating capacity for sorting
         local log_sum_sz = #log_sum
         for k2, v2 in ipairs(log) do 
             -- print("log index " .. log_sum_sz + k2)
