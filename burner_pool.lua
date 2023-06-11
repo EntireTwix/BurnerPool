@@ -1,4 +1,5 @@
 local ccash = require("ccash.api")
+ccash.meta.set_server_address("http://127.0.0.1/")
 
 local module = {}
 
@@ -9,10 +10,10 @@ function module.make_burner()
         local success, response_code, _ = ccash.register(name, pass)
         if (success == false) then                     
             if response_code ~= 409 then
-                return nil, nil
+                return {name = nil, pass = nil}
             end
         else
-            return name, pass
+            return {name = name, pass = pass}
         end
     end
 end
@@ -20,8 +21,28 @@ end
 local max_log_sz = ccash.properties().max_log -- generated each boot
 
 module.BurnerPool = {}
+module.Shell = {}
 
-function module.BurnerPool:new() 
+function module.Shell:new(owner)
+    local temp = setmetatable(module.make_burner(), { __index = module.BurnerPool })
+    temp.owner = owner
+
+    return temp
+end
+
+function module.Shell:deposit(dest)
+    ccash.send_funds(self.name, self.pass, dest, ccash.get_bal(self.name))
+end
+
+function module.Shell:withdraw()
+    ccash.send_funds(self.name, self.pass, self.owner, ccash.get_bal(self.name))
+end
+
+function module.Shell:del()
+    ccash.delete_self(self.name, self.pass)
+end
+
+function module.BurnerPool:new()
     local temp = setmetatable({}, { __index = module.BurnerPool })
     temp.accounts = {}
 
@@ -33,8 +54,9 @@ function module.BurnerPool:gen_adress()
     local adress
 
     if (pool_sz == 0) or (self.accounts[pool_sz].capacity == 0) then
-        local name, pass = module.make_burner()
-        table.insert(self.accounts, {name = name, pass = pass, capacity = max_log_sz - 1})
+        local temp_burner = module.make_burner()
+        temp_burner.capacity = max_log_sz - 1
+        table.insert(self.accounts, temp_burner)
     else
         self.accounts[#self.accounts].capacity = self.accounts[#self.accounts].capacity - 1
         -- print ("capacity decremented to " .. self.accounts[#self.accounts].capacity)
@@ -68,10 +90,6 @@ function module.BurnerPool:del()
         ccash.delete_self(v.name, v.pass)
     end
     self.accounts = {}
-end
-
-function module.BurnerPool:__gc()
-    self:del()
 end
 
 return module
