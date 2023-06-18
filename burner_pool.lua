@@ -3,9 +3,13 @@ ccash.meta.set_server_address("http://127.0.0.1/")
 
 local module = {}
 
+-- generated each boot
+local max_log_sz = ccash.properties().max_log
+local max_name_sz = ccash.properties().max_name_sz
+
 function module.make_burner()
     while 1 == 1 do
-        local name = tostring(math.random(10^2, 10^16 - 1))
+        local name = tostring(math.random(10^2, 10^max_name_sz - 1))
         local pass = tostring(math.random(10^8, 10^9 - 1))
         local success, response_code, _ = ccash.register(name, pass)
         if (success == false) then                     
@@ -17,8 +21,6 @@ function module.make_burner()
         end
     end
 end
-
-local max_log_sz = ccash.properties().max_log -- generated each boot
 
 module.BurnerPool = {}
 module.Shell = {}
@@ -84,6 +86,8 @@ function module.BurnerPool:get_logs()
 
     return log_sum
 end
+
+-- TODO: module.BurnerPool:send_funds(dest, amount)
 
 function module.BurnerPool:del()
     for k, v in ipairs(self.accounts) do
