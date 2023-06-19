@@ -7,12 +7,14 @@ local module = {}
 local max_log_sz = ccash.properties().max_log
 local max_name_sz = ccash.properties().max_name_size
 
+assert(max_log_sz ~= nil and max_name_sz ~= nil, "can't contact the server")
+
 function module.make_burner()
     while 1 == 1 do
-        local name = tostring(math.random(10^2, 10^max_name_sz - 1))
+        local name = tostring(math.random(10^2, math.min((10^max_name_sz) - 1, 10^17)))
         local pass = tostring(math.random(10^8, 10^9 - 1))
         local success, response_code, _ = ccash.register(name, pass)
-        if (success == false) then                     
+        if (success == false) then
             if response_code ~= 409 then
                 return {name = nil, pass = nil}
             end
@@ -72,7 +74,7 @@ end
 
 function module.BurnerPool:get_logs()
     local log_sum = {}
-    for k, v in ipairs(self.accounts) do
+    for _, v in ipairs(self.accounts) do
         -- print ("we are on account " .. tostring(k))
         local log, _, _ = ccash.get_log_v2(v.name, v.pass)
         if log == nil then return nil end
@@ -87,21 +89,22 @@ function module.BurnerPool:get_logs()
     return log_sum
 end
 
-function module.BurnerPool:send_funds(dest, amount)
+function module.BurnerPool:dump_funds(dest)
     for _, v in ipairs(self.accounts) do
-        local new_bal, resp_code = ccash.send_funds(v.name, v.pass, dest, amount)
-        if (new_bal ~= nil) then
-            return true
-        end
-        if (resp_code == nil) then
-            return nil
-        end
+        ccash.send_funds(v.name, v.pass, dest, ccash.get_bal(v.name))
     end
-    return false
+end
+
+function module.BurnerPool:get_bal()
+    local sum = 0
+    for _, v in ipairs(self.accounts) do
+        sum = sum + ccash.get_bal(v.name)
+    end
+    return sum
 end
 
 function module.BurnerPool:del()
-    for k, v in ipairs(self.accounts) do
+    for _, v in ipairs(self.accounts) do
         ccash.delete_self(v.name, v.pass)
     end
     self.accounts = {}
