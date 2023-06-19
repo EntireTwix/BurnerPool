@@ -5,7 +5,7 @@ local module = {}
 
 -- generated each boot
 local max_log_sz = ccash.properties().max_log
-local max_name_sz = ccash.properties().max_name_sz
+local max_name_sz = ccash.properties().max_name_size
 
 function module.make_burner()
     while 1 == 1 do
@@ -87,7 +87,18 @@ function module.BurnerPool:get_logs()
     return log_sum
 end
 
--- TODO: module.BurnerPool:send_funds(dest, amount)
+function module.BurnerPool:send_funds(dest, amount)
+    for _, v in ipairs(self.accounts) do
+        local new_bal, resp_code = ccash.send_funds(v.name, v.pass, dest, amount)
+        if (new_bal ~= nil) then
+            return true
+        end
+        if (resp_code == nil) then
+            return nil
+        end
+    end
+    return false
+end
 
 function module.BurnerPool:del()
     for k, v in ipairs(self.accounts) do
