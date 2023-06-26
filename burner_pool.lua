@@ -11,8 +11,8 @@ assert(max_log_sz ~= nil and max_name_sz ~= nil, "can't contact the server")
 
 function module.make_burner()
     while 1 == 1 do
-        local name = tostring(math.random(10^2, math.min((10^max_name_sz) - 1, 10^17)))
-        local pass = tostring(math.random(10^8, 10^9 - 1))
+        local name = tostring(math.random(10^2, math.min((10^max_name_sz) - 1, math.huge)))
+        local pass = tostring(math.random(10^12, 10^13 - 1))
         local success, response_code, _ = ccash.register(name, pass)
         if (success == false) then
             if response_code ~= 409 then
